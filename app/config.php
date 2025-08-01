@@ -26,6 +26,25 @@ function formatForLog($data) {
     return $data;
 }
 
+// Função para obter a URL do logo
+function get_logo_url() {
+    $pdo = db_connect();
+    try {
+        $stmt = $pdo->prepare("SELECT config_value FROM system_config WHERE config_key = 'logo_path' LIMIT 1");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($result && !empty($result['config_value'])) {
+            return '/bookmarks/images/' . $result['config_value'];
+        }
+    } catch (PDOException $e) {
+        // Em caso de erro, retorna o logo padrão
+        return '/bookmarks/images/logo.png';
+    }
+    // Retorna o logo padrão se não houver configuração
+    return '/bookmarks/images/logo.png';
+}
+
+
 // Função para definir headers de segurança
 function setSecurityHeaders() {
     header('X-Content-Type-Options: nosniff');

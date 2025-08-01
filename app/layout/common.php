@@ -4,6 +4,9 @@
  * Contém funções e configurações compartilhadas entre todas as páginas
  */
 
+// Inclui o arquivo de configuração principal da aplicação
+require_once __DIR__ . '/../config.php';
+
 // Função para verificar se o usuário está logado
 function checkAuth() {
     if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -162,12 +165,7 @@ function renderFooter() {
                 sidebarContainer.style.width = sidebarCurrentWidth;
                 mainContentArea.style.marginLeft = sidebarCurrentWidth; // Ajusta a margem do conteúdo principal
                 
-                // As linhas abaixo foram removidas pois #sidebarContainer é sempre fixed
-                // sidebarContainer.classList.remove("fixed", "top-0", "left-0"); 
-                // sidebarContainer.classList.add("md:relative");
-                
                 sidebarOverlay.classList.add("hidden"); // Overlay nunca no desktop
-                // mainContentArea.style.marginLeft = "0"; // Removido, pois a margem é definida acima
             }
 
             // Gerencia a visibilidade dos textos do menu e logo
@@ -192,29 +190,19 @@ function renderFooter() {
             // Atualiza a visibilidade do logo na topbar
             const topbarLogoContainer = document.getElementById("topbarLogoContainer");
             if (topbarLogoContainer) {
-                if (isCollapsed) {
-                    topbarLogoContainer.classList.remove("opacity-0", "md:opacity-0");
+                if (isCollapsed && !isMobile) { // Apenas mostra o logo na topbar em desktop quando o menu está recolhido
+                    topbarLogoContainer.classList.remove("opacity-0");
                     topbarLogoContainer.classList.add("opacity-100");
                 } else {
                     topbarLogoContainer.classList.remove("opacity-100");
-                    topbarLogoContainer.classList.add("opacity-0", "md:opacity-0");
+                    topbarLogoContainer.classList.add("opacity-0");
                 }
             }
-            
-            // Atualiza o estado do topbar via AJAX (se necessário)
-            fetch(`/bookmarks/app/update_topbar.php?collapsed=${isCollapsed}&isMobile=${isMobile}`)
-                .then(response => response.text())
-                .then(html => {
-                    const topbarElement = document.querySelector("#mainContentArea > header"); // Seja mais específico se houver múltiplos headers
-                    if (topbarElement) {
-                        topbarElement.outerHTML = html;
-                    }
-                })
-                .catch(error => console.error("Erro ao atualizar o topbar:", error));
         }
 
         // Fecha o menu quando clica no overlay
         sidebarOverlay.addEventListener("click", () => {
+            const isMobile = window.innerWidth < 768;
             if (isMobile) {
                 isMobileMenuHidden = true;
             } else {
@@ -227,20 +215,15 @@ function renderFooter() {
         toggleButton.addEventListener("click", () => {
             const isMobile = window.innerWidth < 768;
             if (isMobile) {
-                // No mobile, o botão de toggle também controla a visibilidade do menu
                 isMobileMenuHidden = !isMobileMenuHidden;
             } else {
-                // No desktop, o botão de toggle controla o estado collapsed/expanded
                 isCollapsed = !isCollapsed;
             }
             adjustLayout();
         });
         
         // Ação do botão de menu mobile na topbar
-        // Adicionamos um listener para o document para capturar cliques no botão mobile
-        // mesmo que ele seja adicionado dinamicamente pelo PHP
         document.addEventListener("click", function(event) {
-            // Verifica se o clique foi no botão mobile ou em algum de seus elementos filhos
             if (event.target.closest("#mobileMenuButton")) {
                 isMobileMenuHidden = !isMobileMenuHidden;
                 adjustLayout();
@@ -248,18 +231,24 @@ function renderFooter() {
         });
 
         // Ajusta o layout inicial na carga da página
-        // Verifica se é mobile e oculta o menu por padrão
-        if (window.innerWidth < 768) {
-            isMobileMenuHidden = true; // Menu mobile sempre oculto por padrão
+        function initializeLayout() {
+            const isMobile = window.innerWidth < 768;
+            if (isMobile) {
+                isMobileMenuHidden = true;
+            } else {
+                // Para desktop, o estado inicial é recolhido
+                isCollapsed = true;
+            }
+            adjustLayout();
         }
-        // Aplica o layout inicial
-        adjustLayout();
+        
+        initializeLayout(); // Aplica o layout inicial
 
         // Ajusta o layout quando a janela é redimensionada
         let resizeTimer;
         window.addEventListener("resize", () => {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(adjustLayout, 100); // Debounce para evitar chamadas excessivas
+            resizeTimer = setTimeout(initializeLayout, 100); // Debounce para evitar chamadas excessivas
         });
     </script>
 </body>
@@ -273,12 +262,13 @@ function renderPageStructure($user, $content) {
     require_once __DIR__ . '/../menu.php'; // Contém a função renderMenu
     require_once __DIR__ . '/../topbar.php'; // Contém a função renderTopBar
     
+    $logo_url = get_logo_url();
     $html = '<div class="min-h-screen flex">
         <div id="sidebarContainer" class="transition-all duration-300 ease-in-out fixed top-0 left-0 h-screen z-20">
             <aside id="sidebar" class="bg-white shadow-sm border-r h-screen flex flex-col collapsed">
                 <div class="h-16 flex items-center justify-between px-4 border-b flex-shrink-0">
                     <div id="logoContainer" class="flex items-center justify-center flex-1 overflow-hidden transition-opacity duration-300">
-                        <img src="/bookmarks/images/logo.png" alt="Logo Sistema" 
+                        <img src="' . htmlspecialchars($logo_url) . '" alt="Logo Sistema" 
                              id="sidebarLogo"
                              class="h-8 w-auto transition-all duration-300" 
                              onerror="this.onerror=null; this.src=\'https://placehold.co/120x32/FFFFFF/1E293B?text=Logo&font=inter\'; this.alt=\'Logo Alternativa\';">

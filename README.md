@@ -118,4 +118,3 @@ Para dúvidas sobre implementações de segurança ou problemas técnicos, consu
 ## Licença
 
 Todos os direitos reservados - Sistema de Gerenciamento
-# logindefaut

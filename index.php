@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once 'app/config.php';
+require_once 'app/data.php';
+
 
 // Configura headers de segurança
 setSecurityHeaders();
@@ -12,6 +14,7 @@ if (!checkRateLimit('login')) {
 } else {
     $is_blocked = false;
 }
+$logo_url = get_logo_url();
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -38,7 +41,7 @@ if (!checkRateLimit('login')) {
 
             <div id="cardHeader" class="text-center mb-8">
                 <div class="flex justify-center mb-6">
-                    <img src="images/logo.png" alt="Logo PerfilPro.shop" class="h-10 md:h-12 w-auto" onerror="this.onerror=null; this.src='https://placehold.co/150x40/FFFFFF/1E293B?text=Logo&font=inter'; this.alt='Logo Alternativa';">
+                    <img src="<?php echo htmlspecialchars($logo_url); ?>" alt="Logo PerfilPro.shop" class="h-10 md:h-12 w-auto" onerror="this.onerror=null; this.src='https://placehold.co/150x40/FFFFFF/1E293B?text=Logo&font=inter'; this.alt='Logo Alternativa';">
                 </div>
                 <h1 id="mainTitle" class="text-2xl font-semibold text-gray-900">Bem-vindo de volta!</h1>
                 <p id="mainSubtitle" class="text-gray-600 mt-2 text-sm">Faça login para acessar seu painel.</p>

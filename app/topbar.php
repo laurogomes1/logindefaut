@@ -1,5 +1,6 @@
 <?php
 function renderTopBar($user, $isMenuCollapsed = false) {
+    $logo_url = get_logo_url();
     $html = '<header class="bg-white shadow h-16 sticky top-0 z-10">
         <div class="h-full px-4 flex items-center justify-between">';    
     
@@ -12,7 +13,7 @@ function renderTopBar($user, $isMenuCollapsed = false) {
     
     // Logo aparece no topbar apenas quando o menu está recolhido
     $html .= '<div id="topbarLogoContainer" class="flex items-center transition-opacity duration-300 md:ml-0 ml-3 ' . (!$isMenuCollapsed ? 'opacity-0 md:opacity-0' : 'opacity-100') . '">
-        <img src="/bookmarks/images/logo.png" alt="Logo Sistema" 
+        <img src="' . htmlspecialchars($logo_url) . '" alt="Logo Sistema" 
             class="h-8 w-auto transition-all duration-300" 
             id="topbarLogo"
             onerror="this.onerror=null; this.src=\'https://placehold.co/120x32/FFFFFF/1E293B?text=Logo&font=inter\'; this.alt=\'Logo Alternativa\';">
